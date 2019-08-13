@@ -7,10 +7,12 @@ using System.Threading.Tasks;
 using System.Collections.Generic;
 using System.Security.Claims;
 using System;
+using AngularSixApp.API.Helpers;
 
 
 namespace AngularSixApp.API.Controllers
 {
+    [ServiceFilter(typeof(LogUserActivity))]
     [Authorize]
     [Route("api/[controller]")]
     [ApiController]
