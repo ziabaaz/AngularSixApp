@@ -8,6 +8,7 @@ using System.Collections.Generic;
 using System.Security.Claims;
 using System;
 using AngularSixApp.API.Helpers;
+using AngularSixApp.API.Models;
 
 
 namespace AngularSixApp.API.Controllers
@@ -78,5 +79,39 @@ namespace AngularSixApp.API.Controllers
             throw new Exception($"Update for {id} failed");
         }
 
+        [HttpPost("{id}/like/{recipientId}")]
+        public async Task<IActionResult> LikeUser(int id, int recipientid)
+        {
+            if(id!= int.Parse(User.FindFirst(ClaimTypes.NameIdentifier).Value))
+            {
+                return Unauthorized();
+            }
+
+            var like = await _repo.GetLike(id, recipientid);
+
+            if(like != null) 
+            {
+                return BadRequest("You already liked this user.");
+            }
+            if(await _repo.GetUser(recipientid) == null)
+            {
+                return NotFound();
+            }
+
+            like = new Like
+            {
+                LikerId = id,
+                LikeeId = recipientid
+            };
+
+            _repo.Add<Like>(like);
+
+            if(await _repo.SaveAll())
+            {
+                return Ok();
+            }
+            
+            return BadRequest("Failed to like user");
+        }
     }
 }
